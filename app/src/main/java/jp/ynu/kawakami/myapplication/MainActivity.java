@@ -211,9 +211,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     protected void onResume() {
         super.onResume();
-        manager.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_UI);
-        manager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_UI);
-        manager.registerListener(this, mMg, SensorManager.SENSOR_DELAY_UI);
+        manager.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_FASTEST);
+        manager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_FASTEST);
+        manager.registerListener(this, mMg, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     @Override
@@ -234,6 +234,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         switch (event.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
+                Log.d("SensorTest",
+                        String.format("data (%d) : %d,%d",
+                                event.timestamp,System.nanoTime(),System.currentTimeMillis()));
+
                 if(display1) {
                     xTextView.setText(x);
                     yTextView.setText(y);
