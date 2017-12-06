@@ -50,9 +50,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     private Button connectButton;
     private MemeLib memeLib;
 
-    int[] total = new int[4];
-    int[] total_time = new int[4];
-
     SensorManager manager;
     Sensor mAcc;
     Sensor mGyro;
@@ -213,9 +210,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     protected void onResume() {
         super.onResume();
-        manager.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_GAME);
-        manager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_GAME);
-        manager.registerListener(this, mMg, SensorManager.SENSOR_DELAY_GAME);
+        manager.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_UI);
+        manager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_UI);
+        manager.registerListener(this, mMg, SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override
