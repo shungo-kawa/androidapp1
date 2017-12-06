@@ -17,10 +17,10 @@ public class MyOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db){
-        db.execSQL("create table acc(" + " time text not null," + "x text," + "y text," + "z text" + ");");
-        db.execSQL("create table gyro("  + " time text not null," + "x text," + "y text," + "z text" + ");");
-        db.execSQL("create table gyro_raw("  + " time text not null," + "x text," + "y text," + "z text" + ");");
-        db.execSQL("create table jins(" + " time text not null," + "x text," + "y text," + "z text," + "roll text," + "pitch text," + "yaw text," + "speed text,"+ "strength text" + ");");
+        db.execSQL("create table acc(" + "_id integer primary key autoincrement,"+ "timestamp text," + " time text not null," + "x text," + "y text," + "z text" + ");");
+        db.execSQL("create table gyro(" + "_id integer primary key autoincrement," + "timestamp text,"+ " time text not null," + "x text," + "y text," + "z text" + ");");
+        db.execSQL("create table mgn(" + "_id integer primary key autoincrement," + "timestamp text,"+ " time text not null," + "x text," + "y text," + "z text" + ");");
+        db.execSQL("create table jins("+ "_id integer primary key autoincrement," + " time text not null," + "x text," + "y text," + "z text," + "roll text," + "pitch text," + "yaw text," + "speed text,"+ "strength text" + ");");
         Log.d("test","make db");
     }
 

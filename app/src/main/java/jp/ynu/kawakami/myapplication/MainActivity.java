@@ -50,6 +50,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     private Button connectButton;
     private MemeLib memeLib;
 
+    int[] total = new int[4];
+    int[] total_time = new int[4];
+
     SensorManager manager;
     Sensor mAcc;
     Sensor mGyro;
@@ -74,8 +77,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     TextView dateTextView;
     MyOpenHelper helper = new MyOpenHelper(this);
     int start = 0;
-    boolean display1 = true;
-    boolean display2 = true;
+    boolean display1 = false;
+    boolean display2 = false;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd HH:mm:ss.SSS");
 
     final private MemeConnectListener memeConnectListener = new MemeConnectListener() {
@@ -114,20 +117,20 @@ public class MainActivity extends Activity implements SensorEventListener {
         xTextView = (TextView) findViewById(R.id.xValue);
         yTextView = (TextView) findViewById(R.id.yValue);
         zTextView = (TextView) findViewById(R.id.zValue);
-        xgTextView=(TextView)findViewById(R.id.xValue_gyro);
-        ygTextView=(TextView)findViewById(R.id.yValue_gyro);
-        zgTextView=(TextView)findViewById(R.id.zValue_gyro);
-        xmgTextView=(TextView)findViewById(R.id.xValue_gyro_raw);
-        ymgTextView=(TextView)findViewById(R.id.yValue_gyro_raw);
-        zmgTextView=(TextView)findViewById(R.id.zValue_gyro_raw);
-        memexTextView = (TextView)findViewById(R.id.meme_accX);
-        memeyTextView = (TextView)findViewById(R.id.meme_accY);
-        memezTextView = (TextView)findViewById(R.id.meme_accZ);
-        rollTextView = (TextView)findViewById(R.id.meme_roll);
-        pitchTextView = (TextView)findViewById(R.id.meme_pitch);
-        yawTextView = (TextView)findViewById(R.id.meme_yaw);
-        speed = (TextView)findViewById(R.id.speed);
-        strength = (TextView)findViewById(R.id.strength);
+        xgTextView = (TextView) findViewById(R.id.xValue_gyro);
+        ygTextView = (TextView) findViewById(R.id.yValue_gyro);
+        zgTextView = (TextView) findViewById(R.id.zValue_gyro);
+        xmgTextView = (TextView) findViewById(R.id.xValue_gyro_raw);
+        ymgTextView = (TextView) findViewById(R.id.yValue_gyro_raw);
+        zmgTextView = (TextView) findViewById(R.id.zValue_gyro_raw);
+        memexTextView = (TextView) findViewById(R.id.meme_accX);
+        memeyTextView = (TextView) findViewById(R.id.meme_accY);
+        memezTextView = (TextView) findViewById(R.id.meme_accZ);
+        rollTextView = (TextView) findViewById(R.id.meme_roll);
+        pitchTextView = (TextView) findViewById(R.id.meme_pitch);
+        yawTextView = (TextView) findViewById(R.id.meme_yaw);
+        speed = (TextView) findViewById(R.id.speed);
+        strength = (TextView) findViewById(R.id.strength);
 
         dateTextView = (TextView) findViewById(R.id.date);
 
@@ -159,7 +162,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 SQLiteDatabase db = helper.getWritableDatabase();
                 db.delete("acc", null, null);
                 db.delete("gyro", null, null);
-                db.delete("gyro_raw", null, null);
+                db.delete("mgn", null, null);
                 db.delete("jins", null, null);
                 db.close();
                 Log.d("test", "deleted");
@@ -182,15 +185,15 @@ public class MainActivity extends Activity implements SensorEventListener {
         });
 
 
-        final CompoundButton  sw1 = (Switch)findViewById(R.id.android_switch);
-        final CompoundButton  sw2 = (Switch)findViewById(R.id.meme_switch);
+        final CompoundButton sw1 = (Switch) findViewById(R.id.android_switch);
+        final CompoundButton sw2 = (Switch) findViewById(R.id.meme_switch);
         sw1.setChecked(true);
         sw2.setChecked(true);
 
         sw1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                display1=isChecked;
+                display1 = isChecked;
                 // 状態が変更された
                 Toast.makeText(MainActivity.this, "isChecked : " + isChecked, Toast.LENGTH_SHORT).show();
             }
@@ -199,7 +202,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         sw2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                display2=isChecked;
+                display2 = isChecked;
                 // 状態が変更された
                 Toast.makeText(MainActivity.this, "isChecked : " + isChecked, Toast.LENGTH_SHORT).show();
             }
@@ -207,13 +210,12 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 
 
-
     @Override
     protected void onResume() {
         super.onResume();
-        manager.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_FASTEST);
-        manager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_FASTEST);
-        manager.registerListener(this, mMg, SensorManager.SENSOR_DELAY_FASTEST);
+        manager.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_GAME);
+        manager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_GAME);
+        manager.registerListener(this, mMg, SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -228,17 +230,16 @@ public class MainActivity extends Activity implements SensorEventListener {
         long currentTimeMillis = System.currentTimeMillis();
         Date date = new Date(currentTimeMillis);
         String time = simpleDateFormat.format(date);
+        String timestamp = String.valueOf(event.timestamp);
         String x = String.valueOf(event.values[0]);
         String y = String.valueOf(event.values[1]);
         String z = String.valueOf(event.values[2]);
 
-        switch (event.sensor.getType()){
+        switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
-                Log.d("SensorTest",
-                        String.format("data (%d) : %d,%d",
-                                event.timestamp,System.nanoTime(),System.currentTimeMillis()));
 
-                if(display1) {
+
+                if (display1) {
                     xTextView.setText(x);
                     yTextView.setText(y);
                     zTextView.setText(z);
@@ -249,22 +250,21 @@ public class MainActivity extends Activity implements SensorEventListener {
                 if (start == 1) {
 
                     final SQLiteDatabase db = helper.getWritableDatabase();
-                    if (x.equals("")) {
-                        Toast.makeText(MainActivity.this, "入力してください。", Toast.LENGTH_SHORT).show();
-                    } else {
-                        ContentValues insertValues = new ContentValues();
-                        insertValues.put("time", time);
-                        insertValues.put("x", x);
-                        insertValues.put("y", y);
-                        insertValues.put("z", z);
-                        long id = db.insert("acc", time, insertValues);
-                    }
+                    ContentValues insertValues = new ContentValues();
+                    insertValues.put("timestamp", timestamp);
+                    insertValues.put("time", time);
+                    insertValues.put("x", x);
+                    insertValues.put("y", y);
+                    insertValues.put("z", z);
+                    long id = db.insert("acc", time, insertValues);
 
                     db.close();
                 }
                 break;
             case Sensor.TYPE_GYROSCOPE:
-                if(display1) {
+
+
+                if (display1) {
                     xgTextView.setText(x);
                     ygTextView.setText(y);
                     zgTextView.setText(z);
@@ -274,22 +274,24 @@ public class MainActivity extends Activity implements SensorEventListener {
                 if (start == 1) {
 
                     final SQLiteDatabase db = helper.getWritableDatabase();
-                    if (x.equals("")) {
-                        Toast.makeText(MainActivity.this, "入力してください。", Toast.LENGTH_SHORT).show();
-                    } else {
-                        ContentValues insertValues = new ContentValues();
-                        insertValues.put("time", time);
-                        insertValues.put("x", x);
-                        insertValues.put("y", y);
-                        insertValues.put("z", z);
-                        long id = db.insert("gyro", time, insertValues);
-                    }
+                    ContentValues insertValues = new ContentValues();
+                    insertValues.put("timestamp", timestamp);
+                    insertValues.put("time", time);
+                    insertValues.put("x", x);
+                    insertValues.put("y", y);
+                    insertValues.put("z", z);
+                    long id = db.insert("gyro", time, insertValues);
 
                     db.close();
                 }
                 break;
             case Sensor.TYPE_MAGNETIC_FIELD:
-                if(display1) {
+
+//
+//                Log.d("SensorTest",
+//                        String.format("data %d : %d,%d",
+//                                event.timestamp,System.nanoTime(),System.currentTimeMillis()));
+                if (display1) {
                     xmgTextView.setText(x);
                     ymgTextView.setText(y);
                     zmgTextView.setText(z);
@@ -299,23 +301,18 @@ public class MainActivity extends Activity implements SensorEventListener {
                 if (start == 1) {
 
                     final SQLiteDatabase db = helper.getWritableDatabase();
-                    if (x.equals("")) {
-                        Toast.makeText(MainActivity.this, "入力してください。", Toast.LENGTH_SHORT).show();
-                    } else {
-                        ContentValues insertValues = new ContentValues();
-                        insertValues.put("time", time);
-                        insertValues.put("x", x);
-                        insertValues.put("y", y);
-                        insertValues.put("z", z);
-                        long id = db.insert("gyro_raw", time, insertValues);
-                    }
+                    ContentValues insertValues = new ContentValues();
+                    insertValues.put("timestamp", timestamp);
+                    insertValues.put("time", time);
+                    insertValues.put("x", x);
+                    insertValues.put("y", y);
+                    insertValues.put("z", z);
+                    long id = db.insert("mgn", time, insertValues);
 
                     db.close();
                 }
                 break;
         }
-
-
 
 
     }
@@ -447,9 +444,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         MemeLib.setAppClientID(getApplicationContext(), APP_ID, APP_SECRET);
         memeLib = MemeLib.getInstance();
 
-        statusLabel = (TextView)findViewById(R.id.status_label);
+        statusLabel = (TextView) findViewById(R.id.status_label);
 
-        connectButton = (Button)findViewById(R.id.connect_button);
+        connectButton = (Button) findViewById(R.id.connect_button);
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -504,7 +501,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         String roll = String.valueOf(d.getRoll());
         String pitch = String.valueOf(d.getPitch());
         String yaw = String.valueOf(d.getYaw());
-        if(display2) {
+
+        Log.d("test", "MEME DATA GET");
+        if (display2) {
             speed.setText(blink_speed);
             strength.setText(blink_strength);
             memexTextView.setText(memeX);
@@ -521,24 +520,22 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (start == 1) {
 
             final SQLiteDatabase db = helper.getWritableDatabase();
-//            Log.d("test", "time:" + time + ", x:" + x + ",y:" + y+ ",z:" + z);
+            Log.d("test", "MEME DATA UPDATED");
 
-            if (blink_speed.equals("")) {
-                Toast.makeText(MainActivity.this, "入力してください。", Toast.LENGTH_SHORT).show();
-            } else {
-                ContentValues insertValues = new ContentValues();
-                insertValues.put("time", time);
-                insertValues.put("x", memeX);
-                insertValues.put("y", memeY);
-                insertValues.put("z", memeZ);
-                insertValues.put("roll", roll);
-                insertValues.put("pitch",pitch);
-                insertValues.put("yaw",yaw);
-                insertValues.put("speed",blink_speed);
-                insertValues.put("strength",blink_strength);
 
-                long id = db.insert("jins", time, insertValues);
-            }
+            ContentValues insertValues = new ContentValues();
+            insertValues.put("time", time);
+            insertValues.put("x", memeX);
+            insertValues.put("y", memeY);
+            insertValues.put("z", memeZ);
+            insertValues.put("roll", roll);
+            insertValues.put("pitch", pitch);
+            insertValues.put("yaw", yaw);
+            insertValues.put("speed", blink_speed);
+            insertValues.put("strength", blink_strength);
+
+            long id = db.insert("jins", time, insertValues);
+
 
             db.close();
         }
