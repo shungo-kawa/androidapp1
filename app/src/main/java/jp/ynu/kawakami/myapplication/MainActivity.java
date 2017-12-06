@@ -72,6 +72,20 @@ public class MainActivity extends Activity implements SensorEventListener {
     TextView speed;
     TextView strength;
     TextView dateTextView;
+    TextView pitch;
+    TextView roll;
+    TextView yaw;
+    //FOR ORIENTATION
+    private static final int MATRIX_SIZE = 16;
+    float[] in = new float[MATRIX_SIZE];
+    float[] out = new float[MATRIX_SIZE];
+    float[] I = new float[MATRIX_SIZE];
+
+    float[] o = new float[3];
+    float[] m = new float[3];
+    float[] a = new float[3];
+
+    //FOR DB
     MyOpenHelper helper = new MyOpenHelper(this);
     int start = 0;
     boolean display1 = false;
@@ -128,6 +142,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         yawTextView = (TextView) findViewById(R.id.meme_yaw);
         speed = (TextView) findViewById(R.id.speed);
         strength = (TextView) findViewById(R.id.strength);
+         pitch = (TextView)findViewById(R.id.pitch);
+         roll = (TextView)findViewById(R.id.roll);
+         yaw = (TextView)findViewById(R.id.yaw);
 
         dateTextView = (TextView) findViewById(R.id.date);
 
@@ -231,9 +248,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         String x = String.valueOf(event.values[0]);
         String y = String.valueOf(event.values[1]);
         String z = String.valueOf(event.values[2]);
-
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
+                a = event.values.clone();
 
 
                 if (display1) {
@@ -283,6 +300,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 }
                 break;
             case Sensor.TYPE_MAGNETIC_FIELD:
+                m = event.values.clone();
 
 //
 //                Log.d("SensorTest",
@@ -309,6 +327,16 @@ public class MainActivity extends Activity implements SensorEventListener {
                     db.close();
                 }
                 break;
+        }
+
+        if( a != null && m != null ) {
+            SensorManager.getRotationMatrix(in, I, a, m);
+            SensorManager.remapCoordinateSystem(in, SensorManager.AXIS_X, SensorManager.AXIS_Z, out);
+            SensorManager.getOrientation(out, o);
+
+            pitch.setText(String.valueOf((o[1] * 180 / 3.1415 )));
+            roll.setText(String.valueOf((o[0] * 180 / 3.1415 )));
+            yaw.setText(String.valueOf((o[2] * 180 / 3.1415 )));
         }
 
 

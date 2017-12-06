@@ -189,19 +189,22 @@
                     android:id="@+id/textView13"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="X" />
+                    android:text="Pitch"
+                    android:textAlignment="viewEnd" />
 
                 <TextView
                     android:id="@+id/textView14"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Y" />
+                    android:text="Roll"
+                    android:textAlignment="viewEnd" />
 
                 <TextView
                     android:id="@+id/textView15"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Z" />
+                    android:text="Yaw"
+                    android:textAlignment="viewEnd" />
             </LinearLayout>
 
             <LinearLayout
@@ -217,13 +220,13 @@
                     android:text="ORIENTATION" />
 
                 <TextView
-                    android:id="@+id/roll"
+                    android:id="@+id/pitch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="x" />
 
                 <TextView
-                    android:id="@+id/pitch"
+                    android:id="@+id/roll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="y" />
